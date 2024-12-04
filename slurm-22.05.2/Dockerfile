@@ -70,7 +70,7 @@ RUN chmod g+rw /var/lib/mysql /var/log/mariadb /var/run/mariadb && \
     chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/log/mariadb /var/run/mariadb && \
 	ls -ld /var/lib/mysql	/var/log/mysql /var/run/mariadb && \
 	ls -l /var/lib/mysql	/var/log/mysql /var/run/mariadb 
-RUN cmd_start mysqld && \
+RUN mysqld_safe & mysqladmin --silent --wait=30 ping && \
 	mysql -e 'DELETE FROM mysql.user WHERE user NOT LIKE "root";'  && \
     mysql -e 'DELETE FROM mysql.user WHERE Host NOT IN ("localhost","127.0.0.1","%");' && \ 
 #    mysql -e 'GRANT ALL PRIVILEGES ON *.* TO "root"@"%" WITH GRANT OPTION;' && \ 
@@ -80,7 +80,7 @@ RUN cmd_start mysqld && \
     mysql -e 'GRANT ALL PRIVILEGES ON *.* TO "slurm"@"%" WITH GRANT OPTION;' && \ 
     mysql -e 'GRANT ALL PRIVILEGES ON *.* TO "slurm"@"localhost" WITH GRANT OPTION;' && \ 
     mysql -e 'DROP DATABASE IF EXISTS test;' && \ 
-    cmd_stop mysqld 
+    mysqladmin shutdown
 
 COPY install_slurm.sh .
 
