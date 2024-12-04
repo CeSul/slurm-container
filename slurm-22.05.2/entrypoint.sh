@@ -7,6 +7,9 @@ sudo -u munge munged
 
 : "${SLURM_CONF_IN=$SLURM_CONFDIR/slurm.conf.in}"
 : "${SLURM_CONF=$SLURM_CONFDIR/slurm.conf}"
+: "${SLURMDBD_CONF_IN=$SLURM_CONFDIR/slurmdbd.conf.in}"
+: "${SLURMDBD_CONF=$SLURM_CONFDIR/slurmdbd.conf}"
+
 
 # Default number of slurm nodes
 : "${SLURM_NUMNODES=3}"
@@ -21,7 +24,7 @@ sudo -u munge munged
 : "${NODE_BASEPORT=6001}"
 
 # Default hardware profile
-: "${NODE_HW=CPUs=4}"
+: "${NODE_HW=CPUs=1}"
 
 # Generate node names and associated ports
 NODE_NAMES=$(printf "nd[%05i-%05i]" 1 $SLURM_NUMNODES)
@@ -55,12 +58,22 @@ export MANPATH=$SLURM_ROOT/man:$MANPATH
 
 (
     echo "NodeName=${NODE_NAMES} NodeHostname=${NODE_HOST} NodeAddr=${NODE_ADDR} Port=${NODE_PORTS} State=UNKNOWN ${NODE_HW}"
+    #echo "NodeName=${NODE_NAMES} NodeHostname=${NODE_HOST} NodeAddr=${NODE_ADDR} Port=${NODE_PORTS} State=UNKNOWN"
     echo "PartitionName=dkr Nodes=ALL Default=YES MaxTime=INFINITE State=UP"
 ) \
 | sed -e "s/SLURMCTLDHOST/${SLURMCTLD_HOST}/" \
       -e "s/SLURMCTLDADDR/${SLURMCTLD_ADDR}/" \
     $SLURM_CONF_IN - \
 > $SLURM_CONF
+
+sed -e "s/SLURMCTLDHOST/${SLURMCTLD_HOST}/" \
+    -e "s/SLURMCTLDADDR/${SLURMCTLD_ADDR}/" \
+    $SLURMDBD_CONF_IN  > $SLURMDBD_CONF
+	
+chmod 600 $SLURMDBD_CONF
+chown slurm $SLURMDBD_CONF
+
+#ls -l $SLURMDBD_CONF_IN
 
 NODE_NAME_LIST=$(scontrol show hostnames $NODE_NAMES)
 
@@ -71,8 +84,15 @@ done
 
 echo
 echo "Starting Slurm services..."
-echo
 
+echo "Launching mysqld"
+
+mysqld_safe &
+mysqladmin --silent --wait=30 ping
+
+$SLURM_ROOT/sbin/slurmdbd
+
+sleep 3
 $SLURM_ROOT/sbin/slurmctld
 
 for n in $NODE_NAME_LIST
@@ -84,5 +104,8 @@ echo
 sinfo
 echo
 echo
+
+#$SLURM_ROOT/sbin/slurmctld
+#sinfo
 
 exec "$@"
