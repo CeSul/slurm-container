@@ -24,7 +24,7 @@ sudo -u munge munged
 : "${NODE_BASEPORT=6001}"
 
 # Default hardware profile
-: "${NODE_HW=CPUs=64}"
+: "${NODE_HW=CPUs=64 RealMemory=131000}"
 
 # Generate node names and associated ports
 NODE_NAMES=$(printf "nd[%05i-%05i]" 1 $SLURM_NUMNODES)

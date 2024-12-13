@@ -43,6 +43,7 @@ SlurmdPidFile=/var/run/slurmd.%n.pid
 SlurmdPort=6818
 SlurmdSpoolDir=/var/spool/slurmd.%n
 SlurmUser=slurm
+SlurmdParameters=config_overrides
 #SlurmdUser=root
 #SrunEpilog=
 #SrunProlog=
