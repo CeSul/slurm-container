@@ -43,7 +43,9 @@ SlurmdPidFile=/var/run/slurmd.%n.pid
 SlurmdPort=6818
 SlurmdSpoolDir=/var/spool/slurmd.%n
 SlurmUser=slurm
-SlurmdParameters=config_overrides
+#SlurmdParameters=config_overrides
+SlurmctldParameters=node_reg_mem_percent=1
+
 #SlurmdUser=root
 #SrunEpilog=
 #SrunProlog=
@@ -87,9 +89,10 @@ Waittime=0
 SchedulerType=sched/backfill
 SchedulerParameters=preemptstrict_order,preempt_reorder_count=3,max_rpc_cnt=160,batch_sched_delay=5,default_queue_depth=1000,bf_continue,bf_max_job_test=3000,bf_window=2880,bf_resolution=600,disable_user_top,bf_max_time=600,bf_job_part_count_reserve=100
 SelectType=select/cons_tres
-SelectTypeParameters=CR_CPU
+SelectTypeParameters=CR_CPU_Memory
 PreemptType=preempt/partition_prio
 PreemptMode=CANCEL
+
 #
 #
 # JOB PRIORITY
