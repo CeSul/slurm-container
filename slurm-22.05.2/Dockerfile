@@ -110,14 +110,16 @@ RUN mkdir -p /home/spack/
 RUN mkdir -p /home/spack/log
 RUN chmod -R 777 /home/spack/
 RUN chmod -R 777 /home/spack/log
-COPY create_users_and_groups.sh create_slurm_jobs.py /home/spack/
+COPY script_create_users_and_groups.py script_create_slurm_users_and_accounts.py create_slurm_jobs.py /home/spack/
 COPY slurm_anon_epyc64_10days /home/spack/
 COPY restart_slurmd.sh /home/spack/
 COPY example_job.sh /home/spack/
 COPY fix_slurm_conf.sh /home/spack/
 COPY my.cnf /etc
 RUN pip install pandas
+RUN cd /home/spack && python3 script_create_slurm_users_and_accounts.py && python3 script_create_users_and_groups.py
 RUN source /home/spack/create_users_and_groups.sh || true
+#RUN source /home/spack/create_slurm_users_and_accounts.sh || true
 RUN echo "Step 1, Run: docker run --detach --rm -it -e SLURM_NUMNODES=171 slurm-22.05.2"
 RUN echo "Step 2, Run: docker attach dockerid"
 RUN echo "Step 3, Run: sh /home/spack/fix_slurm_conf.sh"

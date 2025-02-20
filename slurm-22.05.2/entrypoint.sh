@@ -91,9 +91,9 @@ mysqld_safe &
 mysqladmin --silent --wait=30 ping
 
 $SLURM_ROOT/sbin/slurmdbd
-
 sleep 3
 $SLURM_ROOT/sbin/slurmctld
+source /home/spack/create_slurm_users_and_accounts.sh
 
 for n in $NODE_NAME_LIST
 do
