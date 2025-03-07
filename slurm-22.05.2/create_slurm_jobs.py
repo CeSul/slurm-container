@@ -18,9 +18,14 @@ df['End'] = pd.to_datetime(df['End'], errors='coerce')
 # Calculate additional columns
 df['Duration'] = (df['End'] - df['Start']).dt.total_seconds()
 
-# Get the reference time (first submit time)
-reference_time = df['Submit'].iloc[0]
-df['TimeDiff'] = (df['Submit'] - reference_time).dt.total_seconds()
+# Initialize TimeDiff column with zeros
+df['TimeDiff'] = 0
+
+# Calculate time differences between consecutive job submissions
+for i in range(1, len(df)):
+    # Time difference between current and previous row
+    df.loc[i, 'TimeDiff'] = (df['Submit'].iloc[i] - df['Submit'].iloc[i-1]).total_seconds()
+
 
 # Template for the SLURM job script
 job_template = """#!/bin/bash
@@ -63,11 +68,6 @@ for index, row in df.iterrows():
     # Extract memory from ReqTRES
     memory = next((param.split('=')[1] for param in row['ReqTRES'].split(',') 
                   if 'mem=' in param), '1G')  # Default to 1G if not found
-
-    if index==1: print('dividing the memory req by 1/2')
-    memory_value = int(memory.rstrip('G'))  # Remove 'G' and convert to int
-    memory = f"{memory_value // 2}G"  # Divide by 2 and add 'G' back
-
     duration = row['Duration']
     time_diff = row['TimeDiff']
 
@@ -87,7 +87,9 @@ for index, row in df.iterrows():
         job_script_file.write(job_script_content)
 
     # Wait for the specified time difference
+    #print(f"sleep for {time_diff}s")
     time.sleep(time_diff)
 
     # Submit the job using sbatch
     os.system(f"sudo -u {user_id} /opt/slurm-22.05.2/bin/sbatch {job_script_filename}")
+    #print(f"sudo -u {user_id} /opt/slurm-22.05.2/bin/sbatch {job_script_filename}")

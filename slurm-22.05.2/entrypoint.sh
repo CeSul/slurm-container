@@ -79,6 +79,7 @@ NODE_NAME_LIST=$(scontrol show hostnames $NODE_NAMES)
 
 for n in $NODE_NAME_LIST
 do
+    echo "$NODE_ADDR       $n" 
     echo "$NODE_ADDR       $n" >> /etc/hosts
 done
 
@@ -90,22 +91,34 @@ echo "Launching mysqld"
 mysqld_safe &
 mysqladmin --silent --wait=30 ping
 
+# libfaketime settings
+PRELOAD_LIB=/usr/lib64/libfaketime/libfaketime.so.1
+CACHE_DURATION=10
+
+
+echo "Starting slurmdbd ..."
+LD_PRELOAD=$PRELOAD_LIB \
+FAKETIME_CACHE_DURATION=$CACHE_DURATION \
 $SLURM_ROOT/sbin/slurmdbd
+
 sleep 3
+echo "Starting slurmctld ..."
+LD_PRELOAD=$PRELOAD_LIB \
+FAKETIME_CACHE_DURATION=$CACHE_DURATION \
 $SLURM_ROOT/sbin/slurmctld
 source /home/spack/create_slurm_users_and_accounts.sh
 
 for n in $NODE_NAME_LIST
 do
-    $SLURM_ROOT/sbin/slurmd -N $n
+	echo "Starting slurmd on $n..."
+	LD_PRELOAD=$PRELOAD_LIB \
+	FAKETIME_CACHE_DURATION=$CACHE_DURATION \
+	$SLURM_ROOT/sbin/slurmd -N $n
 done
 
 echo
 sinfo
 echo
 echo
-
-#$SLURM_ROOT/sbin/slurmctld
-#sinfo
 
 exec "$@"

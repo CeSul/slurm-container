@@ -42,6 +42,8 @@ RUN zypper install -y       \
     ca-certificates         \
     less                    \
     mpich                   \
+    git                     \
+    libfaketime             \
     mpich-devel             \
     sudo
 
@@ -53,6 +55,10 @@ RUN zypper install -y       \
 RUN zypper install -y python3-pip
 
 RUN useradd -M slurm
+
+#RUN git clone https://github.com/wolfcw/libfaketime.git && cd libfaketime && make &&make install
+RUN echo '+0 x1' > /etc/faketimerc
+
 
 RUN mkdir -p /var/log/slurm && chown slurm /var/log/slurm
 RUN mkdir -p /var/spool/slurmctld && chown slurm /var/spool/slurmctld && chmod u+rwx /var/spool/slurmctld
