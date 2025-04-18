@@ -8,7 +8,7 @@ account_users = df[['Account', 'User']].drop_duplicates()
 
 # startup script
 slurm_script = """#!/bin/bash
-export PATH=/opt/slurm-22.05.2/bin:/opt/slurm-22.05.2/sbin:${PATH}
+export PATH=/opt/slurm/bin:/opt/slurm/sbin:${PATH}
 # Add/modify QOS
 sacctmgr -i modify QOS set normal Priority=0
 sacctmgr -i add QOS Name=supporters Priority=100

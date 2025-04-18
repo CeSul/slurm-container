@@ -93,7 +93,7 @@ mysqladmin --silent --wait=30 ping
 
 # libfaketime settings
 PRELOAD_LIB=/usr/lib64/libfaketime/libfaketime.so.1
-CACHE_DURATION=10
+CACHE_DURATION=1
 
 
 echo "Starting slurmdbd ..."
@@ -110,13 +110,14 @@ source /home/spack/create_slurm_users_and_accounts.sh
 
 for n in $NODE_NAME_LIST
 do
-	echo "Starting slurmd on $n..."
-	LD_PRELOAD=$PRELOAD_LIB \
-	FAKETIME_CACHE_DURATION=$CACHE_DURATION \
-	$SLURM_ROOT/sbin/slurmd -N $n
+#echo "Starting slurmd on $n..."
+LD_PRELOAD=$PRELOAD_LIB \
+FAKETIME_CACHE_DURATION=$CACHE_DURATION \
+$SLURM_ROOT/sbin/slurmd -N $n &
 done
 
 echo
+sleep 5
 sinfo
 echo
 echo

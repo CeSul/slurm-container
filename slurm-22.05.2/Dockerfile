@@ -1,7 +1,8 @@
 FROM --platform=linux/amd64 opensuse/leap:15.3
 
 ARG SLURM_VERSION=22.05.2
-ARG SLURM_ROOT=/opt/slurm-${SLURM_VERSION}
+#ARG SLURM_ROOT=/opt/slurm-${SLURM_VERSION}
+ARG SLURM_ROOT=/opt/slurm
 ARG SLURM_CONFDIR=${SLURM_ROOT}/etc
 
 ENV SLURM_VERSION   ${SLURM_VERSION}
@@ -122,6 +123,7 @@ COPY restart_slurmd.sh /home/spack/
 COPY example_job.sh /home/spack/
 COPY fix_slurm_conf.sh /home/spack/
 COPY my.cnf /etc
+COPY slurm.conf_generator.py /home/spack
 RUN pip install pandas
 RUN cd /home/spack && python3 script_create_slurm_users_and_accounts.py && python3 script_create_users_and_groups.py
 RUN source /home/spack/create_users_and_groups.sh || true

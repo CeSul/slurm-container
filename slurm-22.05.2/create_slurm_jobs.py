@@ -38,9 +38,10 @@ job_template = """#!/bin/bash
 # Path to the log file where job information will be saved
 LOG_FILE="./log/slurm_job_$SLURM_JOB_ID.log"
 
-export PATH=/opt/slurm-22.05.2/bin:$PATH
+export PATH=/opt/slurm/bin:$PATH
 
 # Simulate the actual workload (your job's commands)
+#LD_PRELOAD=/usr/lib64/libfaketime/libfaketime.so.1 sleep {duration}
 sleep {duration}
 
 # After the job finishes, log additional job details
@@ -68,6 +69,10 @@ for index, row in df.iterrows():
     # Extract memory from ReqTRES
     memory = next((param.split('=')[1] for param in row['ReqTRES'].split(',') 
                   if 'mem=' in param), '1G')  # Default to 1G if not found
+
+    mem_in_KB = int(memory[:-1])*1000
+    mem_per_node = mem_in_KB/nodes
+    memory=str(int(mem_per_node))+'KB'
     duration = row['Duration']
     time_diff = row['TimeDiff']
 
@@ -91,5 +96,5 @@ for index, row in df.iterrows():
     time.sleep(time_diff)
 
     # Submit the job using sbatch
-    os.system(f"sudo -u {user_id} /opt/slurm-22.05.2/bin/sbatch {job_script_filename}")
+    os.system(f"sudo -u {user_id} /opt/slurm/bin/sbatch {job_script_filename}")
     #print(f"sudo -u {user_id} /opt/slurm-22.05.2/bin/sbatch {job_script_filename}")
