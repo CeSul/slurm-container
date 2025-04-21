@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#for i in `seq 0 81`
-for i in `seq 0 1`
+for i in `seq 0 81`
+#for i in `seq 2 80`
 do
 
 container_name="carc/slurm_vc:slurm-22.05.2_winter_conf_changes"
@@ -18,6 +18,7 @@ docker container exec -w"/home/spack" $container_id \
 python3 slurm.conf_generator.py -s $i -f /opt/slurm/etc/slurm.conf > $outlog
 
 # make slurm daemons reread updated slurm.conf
+echo "Reconfiguring for new slurm.conf"
 docker container exec  $container_id /opt/slurm/bin/scontrol reconfigure 
 sleep 10
 
